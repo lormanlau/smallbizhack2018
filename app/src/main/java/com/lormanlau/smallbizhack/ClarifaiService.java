@@ -36,6 +36,7 @@ public class ClarifaiService extends Service {
     public static final String PREDICT = "PREDICT";
     public static final String PREDICT_RESULTS = "PREDICT_RESULTS";
     public static final String TRAIN = "TRAIN";
+    public static final String TRAIN_RESULT = "TRAIN_RESULT";
     private BroadcastReceiver localBroadcastReceiver;
     private ClarifaiClient client;
     private ClarifaiRequest.OnFailure noModelFound;
@@ -159,6 +160,8 @@ public class ClarifaiService extends Service {
                                     @Override
                                     public void onClarifaiResponseSuccess(Model<?> model) {
                                         Log.i(TAG, "successfully retrained with new item of type " + trainConcept);
+                                        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent(getApplicationContext(), ClarifaiService.class)
+                                        .setAction(TRAIN_RESULT));
                                     }
                                 }, new ClarifaiRequest.OnFailure() {
                                     @Override

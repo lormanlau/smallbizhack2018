@@ -136,10 +136,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (isLoading) {
-            mInventoryLayout.setVisibility(View.GONE);
+            snapPictureButton.hide();
             mLoadingCircle.setVisibility(View.VISIBLE);
         } else {
-            mInventoryLayout.setVisibility(View.VISIBLE);
+            snapPictureButton.show();
             mLoadingCircle.setVisibility(View.GONE);
             populateList();
         }
