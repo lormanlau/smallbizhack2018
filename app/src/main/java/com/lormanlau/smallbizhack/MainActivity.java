@@ -111,9 +111,6 @@ public class MainActivity extends AppCompatActivity {
                 sendBroadcastToClarifai(ClarifaiService.PREDICT, mCurrentPhotoPath);
             }
             LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent(getApplicationContext(), ClarifaiService.class).setAction("avocado"));
-            Intent intent = new Intent(this, InventoryConfirmationActivity.class);
-            intent.putExtra("filePath", mCurrentPhotoPath);
-            startActivityForResult(intent, 123);
         }
         if (requestCode == 123 && resultCode == RESULT_OK) {
             SharedPreferences.Editor editor = sharedPref.edit();
@@ -146,10 +143,10 @@ public class MainActivity extends AppCompatActivity {
                 .putExtra("filename", filename));
     }
 
-    private void addOneChild(String name, int value) {
+    private void addOneChild(String name, int num) {
         LinearLayout layout = (LinearLayout) getLayoutInflater().inflate(R.layout.element_inventory_item, mInventoryLayout);
         ((TextView) layout.getChildAt(0)).setText(name);
-        ((TextView) layout.getChildAt(1)).setText(value);
+        ((TextView) layout.getChildAt(1)).setText(num);
         mInventoryLayout.addView(layout);
     }
 
@@ -157,17 +154,18 @@ public class MainActivity extends AppCompatActivity {
         Set<String> set = sharedPref.getStringSet(INVENTORY_SET, null);
         if (set == null) return;
         for (String name : set) {
-            int value = sharedPref.getInt(name, 0);
-            addOneChild(name, value);
+            int num = sharedPref.getInt(name, 0);
+            addOneChild(name, num);
         }
     }
 
     private void consumePredictions(String[] results) {
-        Set<String> set = sharedPref.getStringSet(INVENTORY_SET, new HashSet<String>());
-        for (String result : results) {
-            set.add(result.split("|")[0]);
-        }
-        sharedPref.edit().putStringSet(INVENTORY_SET, set).commit();
+        if (results == null) return;
+        String itemName = results[0].split("|")[0];
+        Intent intent = new Intent(this, InventoryConfirmationActivity.class);
+        intent.putExtra("filePath", mCurrentPhotoPath);
+        intent.putExtra("itemName", itemName);
+        startActivityForResult(intent, 123);
     }
 
     private void createLocalBroadcastReceiver() {

@@ -156,6 +156,7 @@ public class ClarifaiService extends Service {
             public void onClarifaiResponseSuccess(List<ClarifaiOutput<Prediction>> clarifaiOutputs) {
                 Log.i(TAG, clarifaiOutputs.toString());
                 LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent(getApplicationContext(), MainActivity.class)
+                        .setAction(PREDICT)
                         .putExtra(PREDICT, parseOutputs(clarifaiOutputs)));
             }
         }, new ClarifaiRequest.OnFailure() {
@@ -171,7 +172,7 @@ public class ClarifaiService extends Service {
         String[] result = new String[list.size()];
         for (int i = 0; i < list.size(); ++i) {
             Concept concept = (Concept) list.get(i);
-            result[i] = concept.name() + " " + concept.value();
+            result[i] = concept.name() + "|" + concept.value();
         }
         return result;
     }

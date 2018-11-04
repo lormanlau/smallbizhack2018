@@ -36,7 +36,7 @@ public class InventoryConfirmationActivity extends AppCompatActivity {
         String imagePath = intent.getStringExtra("filePath");
         File imageFile = new File(imagePath);
         mImageView.setImageURI(Uri.fromFile(imageFile));
-
+        mItemTagsEditText.setText(intent.getStringExtra("itemName"));
 
         confirmButton.setOnClickListener(new View.OnClickListener() {
             @Override
