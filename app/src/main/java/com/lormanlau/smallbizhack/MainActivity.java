@@ -10,15 +10,14 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
-import android.support.design.card.MaterialCardView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.FileProvider;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -106,7 +105,6 @@ public class MainActivity extends AppCompatActivity {
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
-                isLoading = true;
             }
         }
     }
@@ -133,10 +131,10 @@ public class MainActivity extends AppCompatActivity {
             File imgFile = new File(mCurrentPhotoPath);
             if (imgFile.exists()) {
                 sendBroadcastToClarifai(ClarifaiService.PREDICT, mCurrentPhotoPath);
+                isLoading = true;
             }
 //            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent(getApplicationContext(), ClarifaiService.class).setAction("avocado"));
-        }
-        if (requestCode == 123 && resultCode == RESULT_OK) {
+        } else if (requestCode == 123 && resultCode == RESULT_OK) {
             SharedPreferences.Editor editor = sharedPref.edit();
             String itemName = data.getStringExtra("itemName");
             int itemAmount = Integer.parseInt(data.getStringExtra("itemAmount"));
@@ -177,16 +175,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addOneChild(String name, int num) {
-        FrameLayout parent = (FrameLayout) getLayoutInflater().inflate(R.layout.element_inventory_item, null);
-        MaterialCardView child = (MaterialCardView) parent.getChildAt(0);
+        LinearLayout parent = (LinearLayout) getLayoutInflater().inflate(R.layout.element_inventory_item, null);
+        CardView child = (CardView) parent.getChildAt(0);
         ((TextView) child.getChildAt(0)).setText(name);
         ((TextView) child.getChildAt(1)).setText(String.valueOf(num));
-        mInventoryLayout.addView(child);
+        mInventoryLayout.addView(parent);
     }
 
-    private void replaceOneChild(String name, int num, int counter){
-        FrameLayout parent = (FrameLayout) mInventoryLayout.getChildAt(counter);
-        MaterialCardView child = (MaterialCardView) parent.getChildAt(0);
+    private void replaceOneChild(String name, int num, int counter) {
+        LinearLayout parent = (LinearLayout) mInventoryLayout.getChildAt(counter);
+        CardView child = (CardView) parent.getChildAt(0);
         ((TextView) child.getChildAt(0)).setText(name);
         ((TextView) child.getChildAt(1)).setText(String.valueOf(num));
     }

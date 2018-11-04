@@ -9,11 +9,11 @@ import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.google.gson.JsonNull;
+import java.io.File;
+import java.util.List;
 
 import clarifai2.api.ClarifaiBuilder;
 import clarifai2.api.ClarifaiClient;
-import clarifai2.api.request.ClarifaiPaginatedRequest;
 import clarifai2.api.request.ClarifaiRequest;
 import clarifai2.api.request.model.Action;
 import clarifai2.api.request.model.GetModelRequest;
@@ -23,10 +23,6 @@ import clarifai2.dto.model.Model;
 import clarifai2.dto.model.output.ClarifaiOutput;
 import clarifai2.dto.prediction.Concept;
 import clarifai2.dto.prediction.Prediction;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class ClarifaiService extends Service {
@@ -161,7 +157,7 @@ public class ClarifaiService extends Service {
                                     public void onClarifaiResponseSuccess(Model<?> model) {
                                         Log.i(TAG, "successfully retrained with new item of type " + trainConcept);
                                         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent(getApplicationContext(), ClarifaiService.class)
-                                        .setAction(TRAIN_RESULT));
+                                                .setAction(TRAIN_RESULT));
                                     }
                                 }, new ClarifaiRequest.OnFailure() {
                                     @Override

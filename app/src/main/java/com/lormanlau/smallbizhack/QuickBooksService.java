@@ -34,7 +34,7 @@ public class QuickBooksService extends Service {
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private void createLocalBroadcastReceiver(){
+    private void createLocalBroadcastReceiver() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(QUERY_QUICKBOOKS);
         filter.addAction(CREATE_QUICKBOOKS_ITEM);
@@ -43,14 +43,14 @@ public class QuickBooksService extends Service {
         LocalBroadcastManager.getInstance(this).registerReceiver(LocalQuickbooksBroadcastReceiver, filter);
     }
 
-    private void stopLocalBroadcastReceiver(){
+    private void stopLocalBroadcastReceiver() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(LocalQuickbooksBroadcastReceiver);
     }
 
     private BroadcastReceiver LocalQuickbooksBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()){
+            switch (intent.getAction()) {
                 case QUERY_QUICKBOOKS:
                     break;
                 case CREATE_QUICKBOOKS_ITEM:
@@ -65,7 +65,7 @@ public class QuickBooksService extends Service {
 
     private class QueryQuickBooksTask extends AsyncTask<Void, Void, Void> {
 
-        QueryQuickBooksTask(){
+        QueryQuickBooksTask() {
 
         }
 

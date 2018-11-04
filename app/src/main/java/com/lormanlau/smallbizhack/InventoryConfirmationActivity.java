@@ -16,8 +16,6 @@ import android.widget.Switch;
 
 import java.io.File;
 
-import clarifai2.api.request.ClarifaiRequest;
-
 public class InventoryConfirmationActivity extends AppCompatActivity {
 
     EditText mAmountEditText, mItemTagsEditText;
