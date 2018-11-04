@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
     boolean isLoading = false;
 
-    int max_limit = 0;
+    int max_limit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +64,9 @@ public class MainActivity extends AppCompatActivity {
                 dispatchTakePictureIntent();
             }
         });
+
+        max_limit = 0;
+
         createLocalBroadcastReceiver();
         startService(new Intent(getApplicationContext(), ClarifaiService.class));
         startService(new Intent(getApplicationContext(), QuickBooksService.class));
@@ -135,13 +138,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        populateList();
         if (isLoading) {
             snapPictureButton.hide();
             mLoadingCircle.setVisibility(View.VISIBLE);
         } else {
             snapPictureButton.show();
             mLoadingCircle.setVisibility(View.GONE);
-            populateList();
         }
 
     }
@@ -159,11 +162,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addOneChild(String name, int num) {
-        LinearLayout layout = (LinearLayout) getLayoutInflater().inflate(R.layout.element_inventory_item, mInventoryLayout);
-        LinearLayout child = (LinearLayout)layout.getChildAt(0);
+        LinearLayout child = (LinearLayout) getLayoutInflater().inflate(R.layout.element_inventory_item, null);
         ((TextView) child.getChildAt(0)).setText(name);
         ((TextView) child.getChildAt(1)).setText(String.valueOf(num));
-//        layout.addView(child);
+        mInventoryLayout.addView(child);
     }
 
     private void replaceOneChild(String name, int num, int counter){
@@ -178,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
         int counter = 0;
         for (String name : set) {
             int num = sharedPref.getInt(name, 0);
-            if (max_limit <= counter) {
+            if (max_limit <= set.size()) {
                 addOneChild(name, num);
                 max_limit++;
             } else {
