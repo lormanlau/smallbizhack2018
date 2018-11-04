@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.design.card.MaterialCardView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.FileProvider;
 import android.support.v4.content.LocalBroadcastManager;
@@ -17,6 +18,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -175,16 +177,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addOneChild(String name, int num) {
-        LinearLayout child = (LinearLayout) getLayoutInflater().inflate(R.layout.element_inventory_item, null);
+        FrameLayout parent = (FrameLayout) getLayoutInflater().inflate(R.layout.element_inventory_item, null);
+        MaterialCardView child = (MaterialCardView) parent.getChildAt(0);
         ((TextView) child.getChildAt(0)).setText(name);
         ((TextView) child.getChildAt(1)).setText(String.valueOf(num));
         mInventoryLayout.addView(child);
     }
 
     private void replaceOneChild(String name, int num, int counter){
-        LinearLayout parent = (LinearLayout) mInventoryLayout.getChildAt(counter);
-        ((TextView) parent.getChildAt(0)).setText(name);
-        ((TextView) parent.getChildAt(1)).setText(String.valueOf(num));
+        FrameLayout parent = (FrameLayout) mInventoryLayout.getChildAt(counter);
+        MaterialCardView child = (MaterialCardView) parent.getChildAt(0);
+        ((TextView) child.getChildAt(0)).setText(name);
+        ((TextView) child.getChildAt(1)).setText(String.valueOf(num));
     }
 
     private void populateList() {
