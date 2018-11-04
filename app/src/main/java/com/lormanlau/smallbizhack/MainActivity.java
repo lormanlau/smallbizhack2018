@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import clarifai2.api.request.ClarifaiRequest;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_TAKE_PHOTO = 1;
@@ -87,10 +89,15 @@ public class MainActivity extends AppCompatActivity {
             File imgFile = new File(mCurrentPhotoPath);
             if (imgFile.exists()) {
                 mImageView.setImageURI(Uri.fromFile(imgFile));
+                sendBroadcastToClarifai(ClarifaiService.PREDICT, mCurrentPhotoPath);
             }
-            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent(getApplicationContext(), ClarifaiService.class).setAction("avocado"));
         }
     }
 
 
+    private void sendBroadcastToClarifai(String action, String filename) {
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent(getApplicationContext(), ClarifaiService.class)
+                .setAction(action)
+                .putExtra("filename", filename));
+    }
 }
