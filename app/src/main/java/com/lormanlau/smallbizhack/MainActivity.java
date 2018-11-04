@@ -22,6 +22,10 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -63,13 +67,8 @@ public class MainActivity extends AppCompatActivity {
         mInventoryRefreshView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        populateList();
-                        mInventoryRefreshView.setRefreshing(false);
-                    }
-                }, 2000);
+                sendBroadcastToQuickbooks(QuickBooksService.QUERY_QUICKBOOKS, null);
+                mInventoryRefreshView.setRefreshing(false);
             }
         });
 
@@ -153,7 +152,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         populateList();
-        sendBroadcastToQuickbooks(QuickBooksService.QUERY_QUICKBOOKS, null);
         if (isLoading) {
             snapPictureButton.hide();
             mLoadingCircle.setVisibility(View.VISIBLE);
@@ -226,6 +224,7 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter filter = new IntentFilter();
         filter.addAction(ClarifaiService.PREDICT_RESULTS);
         filter.addAction(ClarifaiService.TRAIN);
+        filter.addAction(QuickBooksService.QUERY_RESUTLS);
         if (localBroadcastReceiver == null)
             localBroadcastReceiver = new BroadcastReceiver() {
                 @Override
@@ -238,6 +237,9 @@ public class MainActivity extends AppCompatActivity {
                             break;
                         case ClarifaiService.TRAIN:
                             break;
+                        case QuickBooksService.QUERY_RESUTLS:
+                            parseJsonData(intent.getStringExtra("jsonObject"));
+                            break;
                         default:
                     }
                 }
@@ -249,4 +251,32 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(localBroadcastReceiver);
     }
 
+    private void parseJsonData(String json){
+        mInventoryRefreshView.setRefreshing(false);
+        try {
+            JSONObject mJSONObject = new JSONObject(json);
+            Log.i(TAG, "parseJsonData: " + mJSONObject.toString());
+            JSONObject query_response = mJSONObject.getJSONObject("QueryResponse");
+            JSONArray items = query_response.getJSONArray("Item");
+            int counter = 0;
+            Set<String> set = sharedPref.getStringSet(INVENTORY_SET, null);
+            for (int i = 0; i < items.length(); i++) {
+                JSONObject item = items.getJSONObject(i);
+                String name = item.getString("Name");
+                int amount = 0;
+                if (item.has("QtyOnHand")) {
+                     amount = item.getInt("QtyOnHand");
+                }
+                if (max_limit < set.size() + items.length()) {
+                    addOneChild(name, amount);
+                    max_limit++;
+                } else {
+                    replaceOneChild(name, amount, counter);
+                }
+                counter++;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 }
