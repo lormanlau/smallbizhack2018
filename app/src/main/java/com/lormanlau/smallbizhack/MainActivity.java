@@ -118,7 +118,6 @@ public class MainActivity extends AppCompatActivity {
 //            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent(getApplicationContext(), ClarifaiService.class).setAction("avocado"));
         }
         if (requestCode == 123 && resultCode == RESULT_OK) {
-            isLoading = false;
             SharedPreferences.Editor editor = sharedPref.edit();
             String itemName = data.getStringExtra("itemName");
             int itemAmount = Integer.parseInt(data.getStringExtra("itemAmount"));
@@ -210,6 +209,7 @@ public class MainActivity extends AppCompatActivity {
                     switch (intent.getAction()) {
                         case ClarifaiService.PREDICT_RESULTS:
                             Log.i("SBH_MainActivity", "onReceive: " + intent.getStringArrayExtra(ClarifaiService.PREDICT));
+                            isLoading = false;
                             consumePredictions(intent.getStringArrayExtra(ClarifaiService.PREDICT));
                             break;
                         case ClarifaiService.TRAIN:
