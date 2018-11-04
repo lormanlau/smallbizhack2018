@@ -7,6 +7,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.FileProvider;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ImageView;
@@ -38,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
                 dispatchTakePictureIntent();
             }
         });
+
+        startService(new Intent(getApplicationContext(), ClarifaiService.class));
     }
 
     private void dispatchTakePictureIntent() {
@@ -81,10 +84,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
-            File imgFile = new  File(mCurrentPhotoPath);
-            if(imgFile.exists())            {
+            File imgFile = new File(mCurrentPhotoPath);
+            if (imgFile.exists()) {
                 mImageView.setImageURI(Uri.fromFile(imgFile));
             }
+            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent(getApplicationContext(), ClarifaiService.class).setAction("avocado"));
         }
     }
 
