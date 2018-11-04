@@ -91,4 +91,6 @@ public class MainActivity extends AppCompatActivity {
             LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent(getApplicationContext(), ClarifaiService.class).setAction("avocado"));
         }
     }
+
+
 }
