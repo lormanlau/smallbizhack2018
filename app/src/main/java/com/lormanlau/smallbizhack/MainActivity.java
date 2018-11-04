@@ -8,16 +8,17 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.FileProvider;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import java.io.File;
@@ -36,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     FloatingActionButton snapPictureButton;
     String mCurrentPhotoPath;
     SharedPreferences sharedPref;
-    ScrollView mInventoryScrollView;
+    SwipeRefreshLayout mInventoryRefreshView;
     LinearLayout mInventoryLayout;
     BroadcastReceiver localBroadcastReceiver;
     ProgressBar mLoadingCircle;
@@ -55,8 +56,21 @@ public class MainActivity extends AppCompatActivity {
 
         mLoadingCircle = (ProgressBar) findViewById(R.id.loadingCircle);
 
-        mInventoryScrollView = (ScrollView) findViewById(R.id.inventoryScrollView);
+        mInventoryRefreshView = (SwipeRefreshLayout) findViewById(R.id.inventoryScrollView);
         mInventoryLayout = (LinearLayout) findViewById(R.id.inventoryLayout);
+
+        mInventoryRefreshView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        populateList();
+                        mInventoryRefreshView.setRefreshing(false);
+                    }
+                }, 2000);
+            }
+        });
 
         snapPictureButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -143,7 +157,6 @@ public class MainActivity extends AppCompatActivity {
             mLoadingCircle.setVisibility(View.GONE);
             populateList();
         }
-
     }
 
     @Override
@@ -181,9 +194,8 @@ public class MainActivity extends AppCompatActivity {
             if (max_limit <= counter) {
                 addOneChild(name, num);
                 max_limit++;
-            } else {
-                replaceOneChild(name, num, counter);
             }
+            replaceOneChild(name, num, counter);
             counter++;
         }
     }
