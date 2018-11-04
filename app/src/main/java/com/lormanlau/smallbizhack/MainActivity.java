@@ -197,11 +197,12 @@ public class MainActivity extends AppCompatActivity {
         int counter = 0;
         for (String name : set) {
             int num = sharedPref.getInt(name, 0);
-            if (max_limit <= set.size()) {
+            if (max_limit < set.size()) {
                 addOneChild(name, num);
                 max_limit++;
+            } else {
+                replaceOneChild(name, num, counter);
             }
-            replaceOneChild(name, num, counter);
             counter++;
         }
     }
