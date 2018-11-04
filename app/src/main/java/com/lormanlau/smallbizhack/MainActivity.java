@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -30,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_TAKE_PHOTO = 1;
     private static final String INVENTORY_SET = "INVENTORY_SET";
+    final private String TAG = "SBH_MainActivity";
 
     FloatingActionButton snapPictureButton;
     String mCurrentPhotoPath;
@@ -37,6 +39,9 @@ public class MainActivity extends AppCompatActivity {
     ScrollView mInventoryScrollView;
     LinearLayout mInventoryLayout;
     BroadcastReceiver localBroadcastReceiver;
+    ProgressBar mLoadingCircle;
+
+    boolean isLoading = false;
 
     int max_limit = 0;
 
@@ -48,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
 
         snapPictureButton = (FloatingActionButton) findViewById(R.id.snapPicture);
 
+        mLoadingCircle = (ProgressBar) findViewById(R.id.loadingCircle);
+
         mInventoryScrollView = (ScrollView) findViewById(R.id.inventoryScrollView);
         mInventoryLayout = (LinearLayout) findViewById(R.id.inventoryLayout);
 
@@ -58,8 +65,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         createLocalBroadcastReceiver();
-
         startService(new Intent(getApplicationContext(), ClarifaiService.class));
+        startService(new Intent(getApplicationContext(), QuickBooksService.class));
     }
 
     private void dispatchTakePictureIntent() {
@@ -80,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+                isLoading = true;
             }
         }
     }
@@ -110,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
 //            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent(getApplicationContext(), ClarifaiService.class).setAction("avocado"));
         }
         if (requestCode == 123 && resultCode == RESULT_OK) {
+            isLoading = false;
             SharedPreferences.Editor editor = sharedPref.edit();
             String itemName = data.getStringExtra("itemName");
             int itemAmount = Integer.parseInt(data.getStringExtra("itemAmount"));
@@ -127,7 +136,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        populateList();
+        if (isLoading) {
+            mInventoryLayout.setVisibility(View.GONE);
+            mLoadingCircle.setVisibility(View.VISIBLE);
+        } else {
+            mInventoryLayout.setVisibility(View.VISIBLE);
+            mLoadingCircle.setVisibility(View.GONE);
+            populateList();
+        }
+
     }
 
     @Override
@@ -207,4 +224,5 @@ public class MainActivity extends AppCompatActivity {
     private void removeLocalBroadcastReceiver() {
         LocalBroadcastManager.getInstance(getApplicationContext()).unregisterReceiver(localBroadcastReceiver);
     }
+
 }
