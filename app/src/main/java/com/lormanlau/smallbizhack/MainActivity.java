@@ -13,16 +13,11 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.FileProvider;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Layout;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     LinearLayout mInventoryLayout;
     BroadcastReceiver localBroadcastReceiver;
 
+    int max_limit = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,10 +115,12 @@ public class MainActivity extends AppCompatActivity {
             int itemAmount = Integer.parseInt(data.getStringExtra("itemAmount"));
             int inventoryAmount = sharedPref.getInt(itemName, 0);
             if (inventoryAmount == 0) {
-                editor.putInt(itemName, itemAmount);
-            } else {
-                editor.putInt(itemName, inventoryAmount + itemAmount);
+                Set<String> set = sharedPref.getStringSet(INVENTORY_SET, new HashSet<String>());
+                set.add(itemName);
+                editor.putStringSet(INVENTORY_SET, set);
             }
+            editor.putInt(itemName, inventoryAmount + itemAmount);
+            editor.commit();
         }
     }
 
@@ -146,17 +144,31 @@ public class MainActivity extends AppCompatActivity {
 
     private void addOneChild(String name, int num) {
         LinearLayout layout = (LinearLayout) getLayoutInflater().inflate(R.layout.element_inventory_item, mInventoryLayout);
-        ((TextView) layout.getChildAt(0)).setText(name);
-        ((TextView) layout.getChildAt(1)).setText(num);
-        mInventoryLayout.addView(layout);
+        LinearLayout child = (LinearLayout)layout.getChildAt(0);
+        ((TextView) child.getChildAt(0)).setText(name);
+        ((TextView) child.getChildAt(1)).setText(String.valueOf(num));
+//        layout.addView(child);
+    }
+
+    private void replaceOneChild(String name, int num, int counter){
+        LinearLayout parent = (LinearLayout) mInventoryLayout.getChildAt(counter);
+        ((TextView) parent.getChildAt(0)).setText(name);
+        ((TextView) parent.getChildAt(1)).setText(String.valueOf(num));
     }
 
     private void populateList() {
         Set<String> set = sharedPref.getStringSet(INVENTORY_SET, null);
         if (set == null) return;
+        int counter = 0;
         for (String name : set) {
             int num = sharedPref.getInt(name, 0);
-            addOneChild(name, num);
+            if (max_limit <= counter) {
+                addOneChild(name, num);
+                max_limit++;
+            } else {
+                replaceOneChild(name, num, counter);
+            }
+            counter++;
         }
     }
 
