@@ -72,10 +72,58 @@ public class QuickBooksService extends Service {
     private void queryAll() {
         //todo hardcoded limit of 10
         Log.i(TAG, "enter queryAll");
-        JsonObjectRequest stringRequest = new JsonObjectRequest(baseurl, null,
-                new Listener<JSONObject>() {
+
+//        JsonObjectRequest stringRequest = new JsonObjectRequest(baseurl + "/query", null,
+//                new Listener<JSONObject>() {
+//                    @Override
+//                    public void onResponse(JSONObject response) {
+//                        // Display the first 500 characters of the response string.
+//                        Log.i(TAG, "Response is: " + response.toString());
+//                    }
+//
+//
+//                }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                if (error.networkResponse != null) {
+//                    if (error.networkResponse.allHeaders != null) {
+//                        Iterator<Header> it = error.networkResponse.allHeaders.iterator();
+//                        while (it.hasNext()) {
+//                            Log.e(TAG, it.next().toString());
+//                        }
+//                    }
+//                    Log.e(TAG, "" + error.networkResponse.statusCode);
+//                    try {
+//                        Log.e(TAG, "VolleyError: " + new String(error.networkResponse.data, "UTF-8"));
+//                    } catch (Exception e) {
+//                        Log.e(TAG, "VolleyError error failed");
+//                    }
+//                }
+//                Log.e(TAG, "VolleyError: ", error);
+//            }
+//        }) {
+//            //This is for Headers If You Needed
+//            @Override
+//            public Map<String, String> getHeaders() throws AuthFailureError {
+//                Map<String, String> params = new HashMap<String, String>();
+//                params.put("Content-Type", "application/json; charset=UTF-8");
+//                params.put("Authorization", "Bearer " + API_KEY);
+//                return params;
+//            }
+//
+//            //Pass Your Parameters here
+//            @Override
+//            protected Map<String, String> getParams() {
+//                Map<String, String> params = new HashMap<String, String>();
+//                params.put("query", "Select%20*%20from%20Item%20maxresults%202");
+//                return params;
+//            }
+//        };
+
+                StringRequest stringRequest = new StringRequest(Request.Method.GET, baseurl + "/query",
+                new Listener<String>() {
                     @Override
-                    public void onResponse(JSONObject response) {
+                    public void onResponse(String response) {
                         // Display the first 500 characters of the response string.
                         Log.i(TAG, "Response is: " + response.toString());
                     }
@@ -84,16 +132,21 @@ public class QuickBooksService extends Service {
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Iterator<Header> it = error.networkResponse.allHeaders.iterator();
-                while (it.hasNext()) {
-                    Log.e(TAG, it.next().toString());
+                if (error.networkResponse != null) {
+                    if (error.networkResponse.allHeaders != null) {
+                        Iterator<Header> it = error.networkResponse.allHeaders.iterator();
+                        while (it.hasNext()) {
+                            Log.e(TAG, it.next().toString());
+                        }
+                    }
+                    Log.e(TAG, "" + error.networkResponse.statusCode);
+                    try {
+                        Log.e(TAG, "VolleyError: " + new String(error.networkResponse.data, "UTF-8"));
+                    } catch (Exception e) {
+                        Log.e(TAG, "VolleyError error failed");
+                    }
                 }
-                Log.e(TAG, "" + error.networkResponse.statusCode);
-                try {
-                    Log.e(TAG, "VolleyError: " + new String(error.networkResponse.data, "UTF-8"));
-                } catch (Exception e) {
-                    Log.e(TAG, "VolleyError error failed");
-                }
+                Log.e(TAG, "VolleyError: ", error);
             }
         }) {
             //This is for Headers If You Needed
@@ -109,10 +162,12 @@ public class QuickBooksService extends Service {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<String, String>();
-                params.put("query", "Select * from Item maxresults 1");
+                params.put("query", "Select%20*%20from%20Item%20maxresults%202");
+                params.put("minorversion", "4");
                 return params;
             }
         };
+
         requestQueue().add(stringRequest);
     }
 
