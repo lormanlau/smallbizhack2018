@@ -27,8 +27,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".InventoryConfirmationActivity" >
-        </activity>
+        <activity android:name=".InventoryConfirmationActivity"></activity>
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -42,6 +41,9 @@
 
         <service
             android:name=".ClarifaiService"
+            android:exported="false" />
+        <service
+            android:name=".QuickBooksService"
             android:exported="false" />
     </application>
 

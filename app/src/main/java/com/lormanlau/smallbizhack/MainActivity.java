@@ -153,6 +153,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         populateList();
+        sendBroadcastToQuickbooks(QuickBooksService.QUERY_QUICKBOOKS, null);
         if (isLoading) {
             snapPictureButton.hide();
             mLoadingCircle.setVisibility(View.VISIBLE);
@@ -172,6 +173,12 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent(getApplicationContext(), ClarifaiService.class)
                 .setAction(action)
                 .putExtra("filename", filename));
+    }
+
+    private void sendBroadcastToQuickbooks(String action, String param) {
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent(getApplicationContext(), QuickBooksService.class)
+                .setAction(action)
+                .putExtra("param", param));
     }
 
     private void addOneChild(String name, int num) {
