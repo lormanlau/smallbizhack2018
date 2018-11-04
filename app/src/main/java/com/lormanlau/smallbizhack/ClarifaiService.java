@@ -9,11 +9,16 @@ import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.google.gson.JsonNull;
+
 import clarifai2.api.ClarifaiBuilder;
 import clarifai2.api.ClarifaiClient;
+import clarifai2.api.request.ClarifaiPaginatedRequest;
 import clarifai2.api.request.ClarifaiRequest;
+import clarifai2.api.request.model.Action;
 import clarifai2.api.request.model.GetModelRequest;
 import clarifai2.dto.input.ClarifaiInput;
+import clarifai2.dto.model.ConceptModel;
 import clarifai2.dto.model.Model;
 import clarifai2.dto.model.output.ClarifaiOutput;
 import clarifai2.dto.prediction.Concept;
@@ -41,6 +46,7 @@ public class ClarifaiService extends Service {
     private ClarifaiRequest.OnFailure predictFailure;
     private ClarifaiRequest.OnFailure trainFailure;
     private String imageFileName;
+    private String trainConcept;
 
     @Override
     public void onCreate() {
@@ -70,20 +76,6 @@ public class ClarifaiService extends Service {
                         }, predictFailure);
             }
         };
-
-        modelToTrain = new ClarifaiRequest.OnSuccess<Model<?>>() {
-            @Override
-            public void onClarifaiResponseSuccess(Model<?> model) {
-                model.train().executeAsync(trainSuccess, trainFailure);
-            }
-        };
-
-//        predictSuccess = new ClarifaiRequest.OnSuccess<List<ClarifaiOutput<Concept>>>() {
-//            @Override
-//            public void onClarifaiResponseSuccess(List<ClarifaiOutput<Concept>> clarifaiOutputs) {
-//                Log.i(TAG, clarifaiOutputs.toString());
-//            }
-//        };
 
         trainSuccess = new ClarifaiRequest.OnSuccess<Model<?>>() {
             @Override
@@ -148,6 +140,56 @@ public class ClarifaiService extends Service {
         return client.getModelByID("test");
     }
 
+    private void testTrain() {
+        client.getModelByID("test").executeAsync(new ClarifaiRequest.OnSuccess<Model<?>>() {
+            @Override
+            public void onClarifaiResponseSuccess(Model<?> model) {
+                model.asConceptModel().modify().withConcepts(Action.MERGE, Concept.forID(trainConcept)).executeAsync(new ClarifaiRequest.OnSuccess<ConceptModel>() {
+
+                    @Override
+                    public void onClarifaiResponseSuccess(ConceptModel conceptModel) {
+                        client.addInputs().plus(
+                                ClarifaiInput.forImage(new File(imageFileName)).withConcepts(Concept.forID(trainConcept))
+                        ).executeAsync(new ClarifaiRequest.OnSuccess<List<ClarifaiInput>>() {
+
+                            @Override
+                            public void onClarifaiResponseSuccess(List<ClarifaiInput> clarifaiInputs) {
+                                client.trainModel("test").executeAsync(new ClarifaiRequest.OnSuccess<Model<?>>() {
+
+                                    @Override
+                                    public void onClarifaiResponseSuccess(Model<?> model) {
+                                        Log.i(TAG, "successfully retrained with new item of type " + trainConcept);
+                                    }
+                                }, new ClarifaiRequest.OnFailure() {
+                                    @Override
+                                    public void onClarifaiResponseUnsuccessful(int errorCode) {
+                                        Log.e(TAG, "failed to retrain model: " + errorCode);
+                                    }
+                                });
+                            }
+
+                        }, new ClarifaiRequest.OnFailure() {
+                            @Override
+                            public void onClarifaiResponseUnsuccessful(int errorCode) {
+                                Log.e(TAG, "client failed to add new images: " + errorCode);
+                            }
+                        });
+                    }
+                }, new ClarifaiRequest.OnFailure() {
+                    @Override
+                    public void onClarifaiResponseUnsuccessful(int errorCode) {
+                        Log.e(TAG, "failed to merge new concept: " + errorCode);
+                    }
+                });
+            }
+        }, new ClarifaiRequest.OnFailure() {
+            @Override
+            public void onClarifaiResponseUnsuccessful(int errorCode) {
+                Log.e(TAG, "get model failed: " + errorCode);
+            }
+        });
+    }
+
     private void testPredict() {
         client.predict("test").withInputs(
                 ClarifaiInput.forImage(new File(imageFileName))
@@ -196,7 +238,9 @@ public class ClarifaiService extends Service {
                             testPredict();
                             break;
                         case TRAIN:
-                            modelTrain();
+                            imageFileName = intent.getStringExtra("filename");
+                            trainConcept = intent.getStringExtra("concept");
+                            testTrain();
                             break;
                         default:
                     }
