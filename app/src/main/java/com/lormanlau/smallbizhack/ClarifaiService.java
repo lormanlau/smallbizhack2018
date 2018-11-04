@@ -29,6 +29,7 @@ public class ClarifaiService extends Service {
     private final static String TEMP_CLARIFAI_KEY = "ad1b5678586946c9b84addffe7e2d749";
     private final static String CLARIFAI_API_KEY = TEMP_CLARIFAI_KEY;
     public static final String PREDICT = "PREDICT";
+    public static final String PREDICT_RESULTS = "PREDICT_RESULTS";
     public static final String TRAIN = "TRAIN";
     private BroadcastReceiver localBroadcastReceiver;
     private ClarifaiClient client;
@@ -148,7 +149,6 @@ public class ClarifaiService extends Service {
     }
 
     private void testPredict() {
-        Log.i(TAG, imageFileName);
         client.predict("test").withInputs(
                 ClarifaiInput.forImage(new File(imageFileName))
         ).executeAsync(new ClarifaiRequest.OnSuccess<List<ClarifaiOutput<Prediction>>>() {
@@ -156,7 +156,7 @@ public class ClarifaiService extends Service {
             public void onClarifaiResponseSuccess(List<ClarifaiOutput<Prediction>> clarifaiOutputs) {
                 Log.i(TAG, clarifaiOutputs.toString());
                 LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent(getApplicationContext(), MainActivity.class)
-                        .setAction(PREDICT)
+                        .setAction(PREDICT_RESULTS)
                         .putExtra(PREDICT, parseOutputs(clarifaiOutputs)));
             }
         }, new ClarifaiRequest.OnFailure() {
@@ -172,7 +172,7 @@ public class ClarifaiService extends Service {
         String[] result = new String[list.size()];
         for (int i = 0; i < list.size(); ++i) {
             Concept concept = (Concept) list.get(i);
-            result[i] = concept.name() + "|" + concept.value();
+            result[i] = concept.name() + "/" + concept.value();
         }
         return result;
     }

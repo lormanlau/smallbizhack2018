@@ -14,6 +14,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Layout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -110,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
             if (imgFile.exists()) {
                 sendBroadcastToClarifai(ClarifaiService.PREDICT, mCurrentPhotoPath);
             }
-            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent(getApplicationContext(), ClarifaiService.class).setAction("avocado"));
+//            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(new Intent(getApplicationContext(), ClarifaiService.class).setAction("avocado"));
         }
         if (requestCode == 123 && resultCode == RESULT_OK) {
             SharedPreferences.Editor editor = sharedPref.edit();
@@ -161,23 +162,25 @@ public class MainActivity extends AppCompatActivity {
 
     private void consumePredictions(String[] results) {
         if (results == null) return;
-        String itemName = results[0].split("|")[0];
-        Intent intent = new Intent(this, InventoryConfirmationActivity.class);
+        String itemName = results[0].split("/")[0];
+        Intent intent = new Intent(MainActivity.this, InventoryConfirmationActivity.class);
         intent.putExtra("filePath", mCurrentPhotoPath);
         intent.putExtra("itemName", itemName);
+        Log.i("SBH_MainActivity", "consumePredictions: " + itemName);
         startActivityForResult(intent, 123);
     }
 
     private void createLocalBroadcastReceiver() {
         IntentFilter filter = new IntentFilter();
-        filter.addAction(ClarifaiService.PREDICT);
+        filter.addAction(ClarifaiService.PREDICT_RESULTS);
         filter.addAction(ClarifaiService.TRAIN);
         if (localBroadcastReceiver == null)
             localBroadcastReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     switch (intent.getAction()) {
-                        case ClarifaiService.PREDICT:
+                        case ClarifaiService.PREDICT_RESULTS:
+                            Log.i("SBH_MainActivity", "onReceive: " + intent.getStringArrayExtra(ClarifaiService.PREDICT));
                             consumePredictions(intent.getStringArrayExtra(ClarifaiService.PREDICT));
                             break;
                         case ClarifaiService.TRAIN:
